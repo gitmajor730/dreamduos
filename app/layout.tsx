@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Fraunces, Outfit } from "next/font/google";
+import { Outfit, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
-const serif = Fraunces({
+const serif = Source_Serif_4({
   subsets: ["latin"],
   style: ["normal", "italic"],
   display: "swap",

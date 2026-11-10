@@ -19,7 +19,7 @@ export function Header() {
           </a>
         ))}
       </nav>
-      <a className="button button-small header-cta" href="#providers">
+      <a className="button button-small header-cta" href="/join">
         Become a provider
       </a>
       <button
@@ -39,7 +39,7 @@ export function Header() {
               {item.label}
             </a>
           ))}
-          <a className="button" href="#providers" onClick={() => setOpen(false)}>
+          <a className="button" href="/join" onClick={() => setOpen(false)}>
             Become a provider
           </a>
         </nav>

@@ -8,7 +8,7 @@ export function ProviderBand() {
       <p>
         Cleaners, childcare providers, and massage therapists: help us build a more caring kind of home service.
       </p>
-      <a className="button button-light" href="#faq">
+      <a className="button button-light" href="/join">
         Explore becoming a provider
         <Icon name="arrow" />
       </a>

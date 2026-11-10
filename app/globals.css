@@ -34,7 +34,7 @@ img { max-width: 100%; display: block; }
 a { color: inherit; }
 
 h1, h2, h3, .wordmark, .signature em, .hero-card-title {
-  font-family: var(--font-serif), "Fraunces", Georgia, serif;
+  font-family: var(--font-serif), "Source Serif 4", Georgia, serif;
   font-weight: 460;
   letter-spacing: -0.03em;
 }

@@ -601,6 +601,8 @@ section[id] { scroll-margin-top: 92px; }
 
 .split { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
 
+.pair { display: grid; grid-template-columns: 1.4fr 1fr; gap: 0.7rem; }
+
 .service-picker { display: grid; gap: 0.6rem; }
 
 .service-picker button {
@@ -625,7 +627,7 @@ section[id] { scroll-margin-top: 92px; }
 .form-error { color: #8a2a3b; }
 
 @media (max-width: 700px) {
-  .split { grid-template-columns: 1fr; }
+  .split, .pair { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

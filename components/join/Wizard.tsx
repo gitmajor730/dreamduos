@@ -293,8 +293,10 @@ export function Wizard({ url, anonKey }: { url: string; anonKey: string }) {
             <Field label="First name" value={draft.first_name} onChange={(value) => update("first_name", value)} />
             <Field label="Last name" value={draft.last_name} onChange={(value) => update("last_name", value)} />
           </div>
-          <Field label="Email" type="email" value={draft.email} onChange={(value) => update("email", value)} required />
-          <Field label="Mobile" value={draft.phone} onChange={(value) => update("phone", value)} />
+          <div className="pair">
+            <Field label="Email" type="email" value={draft.email} onChange={(value) => update("email", value)} required />
+            <Field label="Mobile" value={draft.phone} onChange={(value) => update("phone", value)} />
+          </div>
           <div className="split">
             <Field label="City" value={draft.city} onChange={(value) => update("city", value)} />
             <Field label="State" value={draft.state} onChange={(value) => update("state", value)} />

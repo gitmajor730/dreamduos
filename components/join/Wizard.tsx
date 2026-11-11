@@ -275,7 +275,7 @@ export function Wizard({ url, anonKey }: { url: string; anonKey: string }) {
       <a className="wordmark" href="/">dreamduos</a>
       <p className="eyebrow">Provider application</p>
       <h1>Join the Dream Duos network.</h1>
-      <p className="lede">Tell us what you’re great at. You can leave and come back with the link we email you. Applying is not the same as being approved to take paid jobs.</p>
+      <p className="lede">Tell us what you’re great at. You can move through the application now, and email yourself a link if you want to finish later. Applying is not the same as being approved to take paid jobs.</p>
       <ol className="join-steps">
         {steps.map((label, index) => (
           <li key={label} className={index === step ? "is-current" : undefined}>
@@ -303,11 +303,14 @@ export function Wizard({ url, anonKey }: { url: string; anonKey: string }) {
             <Field label="ZIP" value={draft.zip} onChange={(value) => update("zip", value)} />
           </div>
           <Choice label="Preferred contact" value={draft.contact_method} options={["Email", "SMS", "Either"].map((item) => [item, item])} onChange={(value) => update("contact_method", value)} />
-          {!user ? <button className="button" disabled={busy || !draft.email}>Email me a link to continue</button> : <button className="button" type="submit">Continue</button>}
+          <div className="join-nav">
+            <button className="button" type="button" onClick={() => setStep(1)}>Continue</button>
+            <button className="text-button" type="submit" disabled={busy || !draft.email}>Email me a link to save my place</button>
+          </div>
         </form>
       ) : null}
 
-      {user && draft.applicant_type === "individual" && step === 1 ? (
+      {draft.applicant_type === "individual" && step === 1 ? (
         <section className="join-form">
           <p>Select every service you’d like to offer. Each one gets its own questions.</p>
           <div className="service-picker">
@@ -323,7 +326,7 @@ export function Wizard({ url, anonKey }: { url: string; anonKey: string }) {
         </section>
       ) : null}
 
-      {user && draft.applicant_type === "individual" && step === 2 ? (
+      {draft.applicant_type === "individual" && step === 2 ? (
         <section className="join-form">
           {draft.selected.length === 0 ? <p>Choose at least one service first.</p> : null}
           {draft.selected.map((serviceId) => {
@@ -351,14 +354,21 @@ export function Wizard({ url, anonKey }: { url: string; anonKey: string }) {
         </section>
       ) : null}
 
-      {user && draft.applicant_type === "individual" && step === 3 ? (
+      {draft.applicant_type === "individual" && step === 3 ? (
         <section className="join-form">
           <Field label="Home base ZIP" value={draft.home_zip} onChange={(value) => update("home_zip", value)} />
           <Choice label="Service radius" value={draft.radius_miles} options={radii.map((item) => [item, `${item} miles`])} onChange={(value) => update("radius_miles", value)} />
           <Field label="Preferred cities or ZIPs" value={draft.preferred_areas} onChange={(value) => update("preferred_areas", value)} />
           <Choice label="Reliable transportation" value={draft.has_transportation} options={[["Yes", "Yes"], ["No", "No"]]} onChange={(value) => update("has_transportation", value)} />
           <Field label="Earliest start date" type="date" value={draft.start_date} onChange={(value) => update("start_date", value)} />
-          <Checks label="Days available" options={weekdays} value={draft.days} onChange={(value) => update("days", value)} />
+          <div>
+            <p className="field-label">Days available</p>
+            <div className="day-chips">
+              {weekdays.map((day) => (
+                <button key={day} type="button" className={draft.days.includes(day) ? "is-on" : undefined} aria-pressed={draft.days.includes(day)} onClick={() => update("days", draft.days.includes(day) ? draft.days.filter((item) => item !== day) : [...draft.days, day])}>{day}</button>
+              ))}
+            </div>
+          </div>
           {draft.days.map((day) => (
             <Field key={day} label={`${day} hours`} value={draft.day_windows[day] ?? ""} onChange={(value) => update("day_windows", { ...draft.day_windows, [day]: value })} />
           ))}
@@ -369,7 +379,7 @@ export function Wizard({ url, anonKey }: { url: string; anonKey: string }) {
         </section>
       ) : null}
 
-      {user && draft.applicant_type === "individual" && step === 4 ? (
+      {draft.applicant_type === "individual" && step === 4 ? (
         <section className="join-form">
           <p className="form-note">Education and licenses can be added now or later. References are not part of this first application.</p>
           <Field label="Highest education" value={draft.education_level} onChange={(value) => update("education_level", value)} />
@@ -383,7 +393,7 @@ export function Wizard({ url, anonKey }: { url: string; anonKey: string }) {
         </section>
       ) : null}
 
-      {user && draft.applicant_type === "individual" && step === 5 ? (
+      {draft.applicant_type === "individual" && step === 5 ? (
         <section className="join-form">
           <p className="form-note">This is a draft. Nothing is published until Dream Duos reviews it and you agree.</p>
           <Field label="Display name" value={draft.display_name} onChange={(value) => update("display_name", value)} />
@@ -398,7 +408,7 @@ export function Wizard({ url, anonKey }: { url: string; anonKey: string }) {
         </section>
       ) : null}
 
-      {user && draft.applicant_type === "business" && step === 1 ? (
+      {draft.applicant_type === "business" && step === 1 ? (
         <section className="join-form">
           <Field label="Business name" value={draft.business_name} onChange={(value) => update("business_name", value)} />
           <Field label="Contact person" value={draft.business_contact} onChange={(value) => update("business_contact", value)} />
@@ -410,7 +420,7 @@ export function Wizard({ url, anonKey }: { url: string; anonKey: string }) {
         </section>
       ) : null}
 
-      {user && step === steps.length - 1 ? (
+      {step === steps.length - 1 ? (
         <section className="join-form">
           <h2>Review</h2>
           <p>{draft.first_name} {draft.last_name} · {draft.email}</p>
@@ -421,7 +431,7 @@ export function Wizard({ url, anonKey }: { url: string; anonKey: string }) {
           <label className="check"><input type="checkbox" checked={draft.consent_marketing} onChange={(event) => update("consent_marketing", event.target.checked)} /> Send occasional news. Optional.</label>
           <div className="join-nav">
             <button className="button button-light" type="button" onClick={() => setStep(step - 1)}>Back</button>
-            <button className="button" type="button" disabled={busy} onClick={() => { ensureApplication().then(submit); }}>Submit application</button>
+            {user ? <button className="button" type="button" disabled={busy} onClick={() => { ensureApplication().then(submit); }}>Submit application</button> : <button className="button" type="button" disabled={busy || !draft.email} onClick={() => { window.localStorage.setItem("dreamduos-join", JSON.stringify(draft)); void sendLink({ preventDefault() {} } as FormEvent); }}>Email me a link to submit</button>}
           </div>
         </section>
       ) : null}
@@ -448,7 +458,7 @@ function Field({ label, value, onChange, type = "text", required = false }: { la
 
 function Choice({ label, value, options, onChange }: { label: string; value: string; options: [string, string][]; onChange: (value: string) => void }) {
   return (
-    <fieldset>
+    <fieldset className={options.length <= 3 ? "choice-inline" : undefined}>
       <legend>{label}</legend>
       {options.map(([option, text]) => (
         <label key={option} className="check"><input type="radio" name={label} checked={value === option} onChange={() => onChange(option)} /> {text}</label>

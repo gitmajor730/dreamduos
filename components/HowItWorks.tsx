@@ -10,7 +10,7 @@ export function HowItWorks() {
           Good things come in <em>twos.</em>
         </h2>
         <p className="lede">Two services. One visit. Support that fits into your real life.</p>
-        <a className="button" href="#duos">
+        <a className="button" href="/book">
           Build your duo
           <Icon name="arrow" />
         </a>

@@ -15,7 +15,7 @@ export function Hero() {
         <p className="lede">
           The house needs a little love. So do you. Pair two in-home services for the kind of support that makes your whole day feel different.
         </p>
-        <a className="button" href="#duos">
+        <a className="button" href="/book">
           Find your dream duo
           <Icon name="arrow" />
         </a>

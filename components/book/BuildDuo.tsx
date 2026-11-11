@@ -34,12 +34,16 @@ export function BuildDuo() {
           <h1>A little help. Your perfect pair.</h1>
           <p className="book-sub">Choose two services. Make room for you.</p>
           <div className="venn">
-            <ServiceDial label="Your first service" index={first} onChange={(index) => { setFirst(index); if (index === second) setSecond(cycle(index, 1)); }} />
-            <ServiceDial label="Your second service" index={second} onChange={(index) => setSecond(index === first ? cycle(index, 1) : index)} />
+            <div className="bubble left" />
+            <div className="bubble right" />
+            <ServiceDial side="left" label="Your first service" index={first} onChange={(index) => { setFirst(index); if (index === second) setSecond(cycle(index, 1)); }} />
+            <ServiceDial side="right" label="Your second service" index={second} onChange={(index) => setSecond(index === first ? cycle(index, 1) : index)} />
             <div className="venn-you">
-              <span className="you-icon" aria-hidden="true">☺</span>
+              <span className="you-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.6"/><path d="M5.5 19.2c1.2-3 3.4-4.4 6.5-4.4s5.3 1.4 6.5 4.4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
+              </span>
               <strong>You</strong>
-              <p>{left.promise}</p>
+              <p>{left.promise.replace(". ", ".\n")}</p>
             </div>
           </div>
           <p className="swipe-hint">Swipe through services to find your balance.</p>
@@ -101,7 +105,7 @@ function Shell({ step, children }: { step: number; children: ReactNode }) {
   return (
     <div className="book">
       <header className="book-header">
-        <a className="book-logo" href="/"><span aria-hidden="true">♡</span> dream duos</a>
+        <a className="book-logo" href="/"><span className="logo-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 19s-6.2-3.7-8.1-7.1C2.4 9.6 3.3 6.8 6 6.1c1.6-.4 3 .2 4 1.4 1-1.2 2.4-1.8 4-1.4 2.7.7 3.6 3.5 2.1 5.9C18.2 15.3 12 19 12 19Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/></svg></span> dream duos</a>
         <nav>
           <a href="/#how-it-works">How it works</a>
           <a href="/join">My account</a>
@@ -119,21 +123,23 @@ function Shell({ step, children }: { step: number; children: ReactNode }) {
   );
 }
 
-function ServiceDial({ label, index, onChange }: { label: string; index: number; onChange: (index: number) => void }) {
+function ServiceDial({ side, label, index, onChange }: { side: "left" | "right"; label: string; index: number; onChange: (index: number) => void }) {
   const service = duoServices[index];
   return (
-    <div className="dial">
-      <div className="dial-card">
-        <button type="button" aria-label={`Previous ${label}`} onClick={() => onChange(cycle(index, -1))}>‹</button>
-        <img src={service.image} alt="" />
-        <button type="button" aria-label={`Next ${label}`} onClick={() => onChange(cycle(index, 1))}>›</button>
+    <div className={`dial ${side}`}>
+      <div className="dial-inner">
+        <div className="dial-card">
+          <button type="button" aria-label={`Previous ${label}`} onClick={() => onChange(cycle(index, -1))}>‹</button>
+          <img src={service.image} alt="" />
+          <button type="button" aria-label={`Next ${label}`} onClick={() => onChange(cycle(index, 1))}>›</button>
+        </div>
+        <h2>{service.title}</h2>
+        <p>{service.line}</p>
+        <div className="dial-dots" aria-hidden="true">
+          {duoServices.map((item, itemIndex) => <i key={item.id} className={itemIndex === index ? "is-on" : undefined} />)}
+        </div>
+        <p className="dial-label">{label}</p>
       </div>
-      <h2>{service.title}</h2>
-      <p>{service.line}</p>
-      <div className="dial-dots" aria-hidden="true">
-        {duoServices.map((item, itemIndex) => <i key={item.id} className={itemIndex === index ? "is-on" : undefined} />)}
-      </div>
-      <p className="dial-label">{label}</p>
     </div>
   );
 }

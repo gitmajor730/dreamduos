@@ -1,15 +1,16 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { cycle, duoServices } from "@/lib/duo-services";
+import { cycle, duoServices, visitFields, type DuoService } from "@/lib/duo-services";
 
-const steps = ["Build your duo", "Your visit", "Meet your team", "Review & pay"];
+const steps = ["Build your duo", "Your visit", "Your preferences", "Reserve your duo"];
 
 export function BuildDuo() {
   const [step, setStep] = useState(0);
   const [first, setFirst] = useState(0);
   const [second, setSecond] = useState(1);
-  const [visit, setVisit] = useState({ zip: "", date: "", window: "Morning", notes: "" });
+  const [visit, setVisit] = useState({ zip: "", date: upcomingDates()[0], time: "10:00 AM" });
+  const [details, setDetails] = useState<Record<string, Record<string, string>>>({});
   const [requested, setRequested] = useState(false);
 
   const left = duoServices[first];
@@ -51,20 +52,17 @@ export function BuildDuo() {
       ) : null}
 
       {step === 1 ? (
-        <form className="visit-form" onSubmit={(event) => { event.preventDefault(); setStep(2); }}>
-          <h1>Your visit.</h1>
-          <p className="book-sub">Tell us when and where. The quote comes before checkout.</p>
-          <label>ZIP<input value={visit.zip} onChange={(event) => setVisit({ ...visit, zip: event.target.value })} required /></label>
-          <label>Date<input type="date" value={visit.date} onChange={(event) => setVisit({ ...visit, date: event.target.value })} required /></label>
-          <fieldset>
-            <legend>Time of day</legend>
-            {["Morning", "Afternoon", "Evening"].map((option) => (
-              <label key={option} className="check"><input type="radio" name="window" checked={visit.window === option} onChange={() => setVisit({ ...visit, window: option })} /> {option}</label>
-            ))}
-          </fieldset>
-          <label>Notes<textarea value={visit.notes} onChange={(event) => setVisit({ ...visit, notes: event.target.value })} /></label>
-          <button className="button" type="submit">Continue</button>
-        </form>
+        <VisitStep
+          left={left}
+          right={right}
+          summary={summary}
+          visit={visit}
+          details={details}
+          onVisit={setVisit}
+          onDetail={(serviceId, key, value) => setDetails((current) => ({ ...current, [serviceId]: { ...current[serviceId], [key]: value } }))}
+          onBack={() => setStep(0)}
+          onNext={() => setStep(2)}
+        />
       ) : null}
 
       {step === 2 ? (
@@ -84,7 +82,7 @@ export function BuildDuo() {
           <h1>Review and request.</h1>
           <p className="book-sub">Nothing is charged on this screen. We’ll send the quote first.</p>
           <p><strong>{summary}</strong></p>
-          <p>{visit.date || "Date to be chosen"} · {visit.window} · {visit.zip || "ZIP to be added"}</p>
+          <p>{visit.date || "Date to be chosen"} · {visit.time} · {visit.zip || "ZIP to be added"}</p>
           <p className="quote">Starting around ${quote}</p>
           <button className="button" type="button" onClick={() => setRequested(true)}>Request my duo</button>
         </section>
@@ -108,7 +106,7 @@ function Shell({ step, children }: { step: number; children: ReactNode }) {
         <a className="book-logo" href="/"><span className="logo-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 19s-6.2-3.7-8.1-7.1C2.4 9.6 3.3 6.8 6 6.1c1.6-.4 3 .2 4 1.4 1-1.2 2.4-1.8 4-1.4 2.7.7 3.6 3.5 2.1 5.9C18.2 15.3 12 19 12 19Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/></svg></span> dream duos</a>
         <nav>
           <a href="/#how-it-works">How it works</a>
-          <a href="/join">My account</a>
+          <a href="/#duos">Explore our providers</a>
         </nav>
       </header>
       <ol className="book-progress">
@@ -121,6 +119,117 @@ function Shell({ step, children }: { step: number; children: ReactNode }) {
       <main>{children}</main>
     </div>
   );
+}
+
+function VisitStep({ left, right, summary, visit, details, onVisit, onDetail, onBack, onNext }: {
+  left: DuoService;
+  right: DuoService;
+  summary: string;
+  visit: { zip: string; date: string; time: string };
+  details: Record<string, Record<string, string>>;
+  onVisit: (visit: { zip: string; date: string; time: string }) => void;
+  onDetail: (serviceId: string, key: string, value: string) => void;
+  onBack: () => void;
+  onNext: () => void;
+}) {
+  return (
+    <div className="visit-layout">
+      <div className="visit-copy">
+        <h1>A little planning. A lot more breathing room.</h1>
+        <p className="book-sub">Reserve at least 10 days ahead so we can thoughtfully match your duo.</p>
+      </div>
+      <div className="visit-grid">
+        <div className="visit-main">
+          <div className="option-row">
+            <ServiceOptions service={left} values={details[left.id] ?? {}} onChange={(key, value) => onDetail(left.id, key, value)} />
+            <ServiceOptions service={right} values={details[right.id] ?? {}} onChange={(key, value) => onDetail(right.id, key, value)} />
+          </div>
+          <h2>Where and when?</h2>
+          <div className="when-row">
+            <label>ZIP code
+              <span className="field-icon">⌖</span>
+              <input value={visit.zip} placeholder="30066" onChange={(event) => onVisit({ ...visit, zip: event.target.value })} />
+            </label>
+            <label>Requested date
+              <select value={visit.date} onChange={(event) => onVisit({ ...visit, date: event.target.value })}>
+                {upcomingDates().map((date) => <option key={date}>{date}</option>)}
+              </select>
+            </label>
+            <label>Requested start time
+              <select value={visit.time} onChange={(event) => onVisit({ ...visit, time: event.target.value })}>
+                {["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"].map((time) => <option key={time}>{time}</option>)}
+              </select>
+            </label>
+          </div>
+          <p className="when-note">Your requested time is confirmed after matching.</p>
+        </div>
+        <aside className="visit-side">
+          <div className="mini-venn" aria-hidden="true">
+            <span>{left.title}</span>
+            <strong>You</strong>
+            <span>{right.title}</span>
+          </div>
+          <h2>How your reservation works</h2>
+          <ol>
+            <li>Reserve with a deposit.</li>
+            <li>Meet your proposed duo within 3 days.</li>
+            <li>Approve or request a change within 48 hours.</li>
+            <li>We finalize everything by day 7.</li>
+          </ol>
+          <p>All timelines start when you reserve.</p>
+        </aside>
+      </div>
+      <div className="duo-bar visit-bar">
+        <button className="text-button" type="button" onClick={onBack}>← Back</button>
+        <p><span>Your duo</span></p>
+        <strong className="duo-pill">{summary}</strong>
+        <button className="button" type="button" onClick={onNext}>Share my preferences →</button>
+      </div>
+      <p className="concept-note">Concept preview · Sample details and pricing</p>
+    </div>
+  );
+}
+
+function ServiceOptions({ service, values, onChange }: { service: DuoService; values: Record<string, string>; onChange: (key: string, value: string) => void }) {
+  return (
+    <article className="option-card">
+      <h3>{service.title}</h3>
+      {visitFields[service.id].map((field) => {
+        const value = values[field.key] ?? field.defaultValue;
+        if (field.kind === "pills") {
+          return (
+            <div key={field.key} className="pill-field">
+              <span>{field.label}</span>
+              <div>
+                {field.options.map((option) => (
+                  <button key={option} type="button" className={value === option ? "is-on" : undefined} onClick={() => onChange(field.key, option)}>{option}</button>
+                ))}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <label key={field.key}>{field.label}
+            <select value={value} onChange={(event) => onChange(field.key, event.target.value)}>
+              {field.options.map((option) => <option key={option}>{option}</option>)}
+            </select>
+          </label>
+        );
+      })}
+    </article>
+  );
+}
+
+function upcomingDates() {
+  const dates: string[] = [];
+  const start = new Date();
+  start.setDate(start.getDate() + 10);
+  for (let i = 0; i < 21; i += 1) {
+    const date = new Date(start);
+    date.setDate(start.getDate() + i);
+    dates.push(date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }));
+  }
+  return dates;
 }
 
 function ServiceDial({ side, label, index, onChange }: { side: "left" | "right"; label: string; index: number; onChange: (index: number) => void }) {
